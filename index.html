@@ -2,488 +2,339 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MaxHome Reply Assistant V4</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MaxHome Error Shooter</title>
 <style>
   *{box-sizing:border-box}
-  body{margin:0;background:#f5f7fb;color:#172033;font-family:Inter,Segoe UI,Arial,sans-serif}
-  .wrap{max-width:940px;margin:40px auto;padding:0 20px}
-  .card{background:#fff;border:1px solid #e3e8f0;border-radius:16px;padding:24px;box-shadow:0 8px 30px rgba(20,35,60,.07)}
-  h1{margin:0 0 6px;font-size:25px}
-  .sub{color:#657084;margin:0 0 24px}
-  label{display:block;font-weight:650;margin:18px 0 8px}
-  textarea{width:100%;min-height:150px;border:1px solid #cfd7e3;border-radius:10px;padding:13px;font:inherit;resize:vertical;outline:none}
-  textarea:focus{border-color:#667eea;box-shadow:0 0 0 3px rgba(102,126,234,.12)}
-  .row{display:flex;gap:10px;flex-wrap:wrap}
-  .choice{border:1px solid #d5dce7;background:#fff;border-radius:9px;padding:9px 13px;cursor:pointer}
-  .choice.active{border-color:#536dfe;background:#eef1ff;color:#2940bb;font-weight:650}
-  button{border:0;border-radius:9px;padding:11px 16px;font-weight:650;cursor:pointer}
-  button:disabled{opacity:.5;cursor:not-allowed}
-  .primary{background:#4f46e5;color:white;margin-top:20px;width:100%;font-size:15px}
-  .secondary{background:#eef1f6;color:#273449}
-  .danger{background:#fff0f0;color:#b42318}
-  .output{margin-top:22px;border-top:1px solid #e8ecf2;padding-top:20px}
-  .reply{background:#f8f9fc;border:1px solid #e1e6ee;border-radius:10px;padding:16px;min-height:100px;white-space:pre-wrap;line-height:1.55}
-  .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-  .hint{font-size:12px;color:#788397;margin-top:8px}
-  .status{font-size:12px;margin-top:9px;color:#657084}
-  .jira{margin-top:18px;border-top:1px dashed #dde3ec;padding-top:16px}
-  .jiraTitle{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
-  .jiraTitle label{margin:0}
-  .jiraBox{background:#fff;border:1px solid #d9e0ea;border-radius:10px;padding:14px;min-height:76px;line-height:1.5}
-  .jiraField{margin:0 0 10px}
-  .jiraLabel{font-weight:700}
-  .jiraValue{margin-top:2px}
-  .jiraDescription{white-space:pre-wrap}
+  body{margin:0;background:#0b1020;color:#eef2ff;font-family:Arial,sans-serif;display:flex;justify-content:center;min-height:100vh;padding:18px}
+  #wrap{width:min(920px,100%);background:#11182d;border:1px solid #263354;border-radius:18px;padding:14px;box-shadow:0 18px 60px #0008}
+  h1{margin:0 0 10px;font-size:22px}
+  .sub{color:#9aa7c7;font-size:13px;margin-bottom:12px}
+  #hud{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:10px}
+  .stat{background:#18223c;border-radius:10px;padding:8px;text-align:center;font-size:12px;color:#9aa7c7}
+  .stat b{display:block;color:#fff;font-size:17px;margin-top:2px}
+  #progressWrap{height:8px;background:#202b49;border-radius:99px;overflow:hidden;margin-bottom:10px}
+  #progress{height:100%;width:0%;background:#69a7ff;transition:width .15s}
+  #arena{position:relative;height:540px;overflow:hidden;background:radial-gradient(circle at 50% 100%,#182a4d,#090e1d 65%);border:1px solid #29385c;border-radius:14px;touch-action:none;cursor:crosshair}
+  #arena:after{content:"";position:absolute;inset:0;background-image:linear-gradient(#ffffff05 1px,transparent 1px),linear-gradient(90deg,#ffffff05 1px,transparent 1px);background-size:36px 36px;pointer-events:none}
+  .ship{position:absolute;width:54px;height:54px;bottom:18px;left:50%;transform:translateX(-50%);z-index:10}
+  .body{position:absolute;width:34px;height:34px;left:10px;top:19px;background:#dce7ff;border-radius:50% 50% 35% 35%;box-shadow:0 0 18px #69a7ff}
+  .barrel{position:absolute;left:24px;top:5px;width:7px;height:30px;background:#fff;border-radius:5px;transform-origin:50% 100%;z-index:2}
+  .muzzle{position:absolute;left:20px;top:0;width:15px;height:8px;background:#69a7ff;border-radius:4px;z-index:3}
+  .enemy,.boost,.bullet,.enemyBullet,.boss{position:absolute;z-index:5}
+  .enemy{width:138px;padding:8px 9px;border:1px solid #ff6577;background:#351825;border-radius:10px;color:#ffdfe4;font-size:12px;text-align:center;box-shadow:0 5px 16px #0005}
+  .enemy strong{display:block;color:#ff8c9a;font-size:13px}
+  .bullet{width:7px;height:18px;background:#fff;border-radius:5px;box-shadow:0 0 10px #69a7ff}
+  .enemyBullet{width:10px;height:10px;border-radius:50%;background:#ff6175;box-shadow:0 0 12px #ff6175}
+  .boost{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:#163d2a;border:2px solid #55e69a;color:#8dffc3;font-weight:bold;box-shadow:0 0 18px #55e69a88;font-size:10px}
+  .boss{width:210px;height:105px;display:grid;place-items:center;border:2px solid #ff4e67;background:linear-gradient(135deg,#491729,#24101b);border-radius:20px;color:#fff;font-weight:bold;box-shadow:0 0 35px #ff365555}
+  #bossBar{position:absolute;top:12px;left:15%;width:70%;height:12px;background:#321522;border:1px solid #ff6175;border-radius:99px;z-index:20;display:none;overflow:hidden}
+  #bossHP{height:100%;width:100%;background:#ff6175}
+  #message{position:absolute;left:50%;top:45%;transform:translate(-50%,-50%);text-align:center;font-weight:bold;font-size:22px;z-index:30;pointer-events:none;text-shadow:0 2px 12px #000}
+  #controls{display:flex;justify-content:space-between;gap:8px;margin-top:10px}
+  button{border:0;border-radius:10px;padding:12px 18px;background:#26375e;color:#fff;font-weight:bold;cursor:pointer}
+  button:hover{background:#344a7b}
+  .hint{font-size:12px;color:#8f9cba;text-align:center;margin-top:8px}
+  @media(max-width:650px){#hud{grid-template-columns:repeat(3,1fr)}#arena{height:500px}.enemy{width:125px}}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="card">
-    <h1>MaxHome Reply Assistant</h1>
-    <p class="sub">Paste a client remark, add context if needed, and generate a concise client-ready response.</p>
+<div id="wrap">
+  <h1>🎯 MaxHome Error Shooter</h1>
+  <div class="sub">Shoot incoming MaxHome errors. Every 5th level has a boss. <b>v4 stability build</b> — levels are cleaned between rounds. Hit the green boost for 5 seconds of rapid fire.</div>
 
-    <label for="remark">Client Remark</label>
-    <textarea id="remark" placeholder="Paste the client's remark here..."></textarea>
-
-    <label for="context">Additional Context <span style="font-weight:400;color:#788397">(optional)</span></label>
-    <textarea id="context" style="min-height:90px" placeholder="Example: We already fixed the address.&#10;Or: This is a high-priority issue and the team is reviewing it."></textarea>
-
-    <label>Status</label>
-    <div class="row" id="status">
-      <button class="choice active" data-value="auto">Auto-detect</button>
-      <button class="choice" data-value="fixed">Fixed / Updated</button>
-      <button class="choice" data-value="reviewing">Being Reviewed</button>
-      <button class="choice" data-value="notfixed">Not Fixed Yet</button>
-    </div>
-
-    <label>Response Style</label>
-    <div class="row" id="tone">
-      <button class="choice active" data-value="professional">Professional + Concise</button>
-      <button class="choice" data-value="friendly">Friendly</button>
-      <button class="choice" data-value="short">Very Short</button>
-      <button class="choice" data-value="apologetic">More Apologetic</button>
-    </div>
-
-    <button class="primary" onclick="generateReply()">Generate Reply</button>
-    <div class="status" id="statusMsg"></div>
-
-    <div class="output">
-      <label style="margin-top:0">Suggested Reply</label>
-      <div class="reply" id="reply">Your generated response will appear here.</div>
-      <div class="actions">
-        <button class="secondary" onclick="copyReply()">Copy Reply</button>
-        <button class="secondary" onclick="generateReply()">Regenerate</button>
-        <button class="secondary" onclick="shorten()">Make Shorter</button>
-        <button class="secondary" id="jiraBtn" onclick="generateJiraSummary()" disabled>Create Jira Summary</button>
-        <button class="danger" onclick="clearAll()">Clear</button>
-      </div>
-
-      <div class="jira" id="jiraSection" style="display:none">
-        <div class="jiraTitle">
-          <label>Jira Summary</label>
-        </div>
-        <div class="jiraBox" id="jiraSummary"></div>
-        <div class="actions">
-          <button class="secondary" onclick="copyJiraSummary()">Copy Jira Summary</button>
-        </div>
-      </div>
-
-      <div class="hint">This V4 runs locally in your browser. It does not connect to Slack or Jira.</div>
-    </div>
+  <div id="hud">
+    <div class="stat">SCORE<b id="score">0</b></div>
+    <div class="stat">LIVES<b id="lives">❤️❤️❤️❤️❤️</b></div>
+    <div class="stat">LEVEL<b id="level">1</b></div>
+    <div class="stat">COMBO<b id="combo">0</b></div>
+    <div class="stat">RAPID FIRE<b id="rapid">OFF</b></div>
   </div>
+  <div id="progressWrap"><div id="progress"></div></div>
+
+  <div id="arena">
+    <div id="bossBar"><div id="bossHP"></div></div>
+    <div id="message">CLICK TO START</div>
+    <div class="ship" id="ship"><div class="barrel" id="barrel"></div><div class="muzzle"></div><div class="body"></div></div>
+  </div>
+
+  <div id="controls">
+    <button id="left">◀ MOVE</button>
+    <button id="fireBtn">🔫 FIRE</button>
+    <button id="right">MOVE ▶</button>
+  </div>
+  <div class="hint">Move: A/D or ←/→ · Aim: mouse/touch · Shoot: click / Space · Green boost = 5 sec rapid fire</div>
 </div>
 
 <script>
-let selectedStatus="auto", selectedTone="professional", lastRemark="", lastContext="";
+const arena=document.getElementById('arena'), ship=document.getElementById('ship'), barrel=document.getElementById('barrel');
+const scoreEl=document.getElementById('score'), livesEl=document.getElementById('lives'), levelEl=document.getElementById('level');
+const comboEl=document.getElementById('combo'), rapidEl=document.getElementById('rapid'), progressEl=document.getElementById('progress');
+const bossBar=document.getElementById('bossBar'), bossHP=document.getElementById('bossHP'), message=document.getElementById('message');
 
-document.querySelectorAll("#status .choice").forEach(b=>{
-  b.onclick=()=>{
-    document.querySelectorAll("#status .choice").forEach(x=>x.classList.remove("active"));
-    b.classList.add("active");
-    selectedStatus=b.dataset.value;
-  };
-});
-
-document.querySelectorAll("#tone .choice").forEach(b=>{
-  b.onclick=()=>{
-    document.querySelectorAll("#tone .choice").forEach(x=>x.classList.remove("active"));
-    b.classList.add("active");
-    selectedTone=b.dataset.value;
-  };
-});
-
-function clean(s){ return s.replace(/\s+/g," ").trim(); }
-function cap(s){ return s ? s.charAt(0).toUpperCase()+s.slice(1) : s; }
-
-const DOC_NAMES = [
-  "Residential Real Estate Listing Agreement Exclusive Right to Sell",
-  "One to Four Family Residential Contract",
-  "One To Four Family Residential Contract",
-  "Buyer/Tenant Representation Agreement - Long",
-  "Buyer Tenant Representation Agreement - Long",
-  "Better Homes And Gardens Real Estate Gary Greene Privacy Policy",
-  "T-47.1 Residential Real Property Declaration In Lieu Of Affidavit",
-  "MLS Input Sheet",
-  "MLS Print Out",
-  "Lead Paint Addendum",
-  "Wire Fraud Warning",
-  "Funding Requests",
-  "Transaction Summary",
-  "New Home Contract (Completed Construction)",
-  "Amendment",
-  "General Information and Notice to Consumer",
-  "Addendum for property Subject to Mandatory Membership in a property owners association",
-  "Addendum for Property Subject to Mandatory Membership in a Property Owners Association"
+let score=0,lives=5,level=1,combo=0,killsThisLevel=0;
+let killsRequired=14+level*2;
+let playerX=arena.clientWidth/2, aimAngle=0, running=false, gameOver=false;
+let last=0,spawnTimer=0,fireTimer=0,boostTimer=0,rapidUntil=0,boss=null;
+let enemies=[],bullets=[],enemyBullets=[],boosts=[];
+const keys={};
+const errorNames=[
+  "DocuSign Refresh Missing","Fall-Out Not Syncing","Wrong Transaction Type",
+  "Stale Property Address","Duplicate EM","Blank Documents","RECAD Classification",
+  "Closing Date Not Updated","Contract Archived Incorrectly","Lease Check Error",
+  "MLS Checkbox Error","Copy of EM Misclassified","New Buyer Not Syncing","Old Contract Synced",
+  "Contract Page Count Mismatch","Missing Third Party Financing","Cash Deal Financing Error",
+  "Missing Option Period End","Missing Financing Deadline","Missing Survey Due Date",
+  "Missing Objections Due Days","Missing Earnest Money Date","Missing Mutual Acceptance Date",
+  "Seller Disclosure Date Missing","Selling Agent Email Missing","Wrong Contract Version",
+  "Wrong Form Classification","Signed Form Not Found","Unsigned Form Pulled Instead",
+  "Old Buyer Still On Document","Buyer Resync Not Reflected","Archive Sync Error",
+  "Document Archived Too Early","Document Not Archived","Duplicate Document",
+  "Missing Required Document","Wrong Document In Missing Docs","Empty Document Imported",
+  "Page Dropped During Processing","Errors Detected Box Blank","Wrong Property Address",
+  "DPN Address Mismatch","Intermediary Status Mismatch","Seller Disclosure Checkbox Error",
+  "Buyer Initials Required Incorrectly","Attorney Info Required Incorrectly",
+  "DocuSign Certificate Not Auto-Archived","T-47.1 GF Number Missing",
+  "Wrong MLS Document Type","MLS Input Sheet Missing","MLS Printout Missing",
+  "Home Warranty Receipt Missing","CDA Missing","VA Amendment Missing",
+  "Wire Fraud Notice Checkbox Error","Wrong Signature Date","Signature Page Mismatch",
+  "Lease Task Template Missing","Wrong Task Detail For Lease","RfUR Document Count Mismatch",
+  "Approved Status Stuck On Pending Max","Transaction Status Mismatch",
+  "Room Link Buyer Sync Error","Duplicate Room Document","Contract Page 12 Error"
 ];
 
-function extractDocument(text){
-  for(const d of DOC_NAMES){
-    if(text.toLowerCase().includes(d.toLowerCase())) return d;
+function resetGame(){
+  clearLevelObjects();
+  if(boss && boss.el && boss.el.parentNode)boss.el.remove();
+  score=0;lives=5;level=1;combo=0;killsThisLevel=0;killsRequired=14+level*2;
+  enemies=[];bullets=[];enemyBullets=[];boosts=[];boss=null;running=true;gameOver=false;
+  playerX=arena.clientWidth/2; aimAngle=0; rapidUntil=0; boostTimer=0;
+  message.textContent="";
+  bossBar.style.display="none";
+  render();
+}
+function render(){
+  ship.style.left=playerX+"px";
+  barrel.style.transform=`rotate(${aimAngle}rad)`;
+  scoreEl.textContent=score;
+  livesEl.textContent="❤️".repeat(Math.max(0,lives))+"🖤".repeat(5-Math.max(0,lives));
+  levelEl.textContent=level;
+  comboEl.textContent=combo;
+  rapidEl.textContent=Date.now()<rapidUntil ? Math.ceil((rapidUntil-Date.now())/1000)+"s" : "OFF";
+  progressEl.style.width=Math.min(100,(killsThisLevel/killsRequired)*100)+"%";
+}
+function setAim(x,y){
+  const r=arena.getBoundingClientRect();
+  const sx=playerX, sy=arena.clientHeight-45;
+  aimAngle=Math.atan2(x-r.left-sx,-(y-r.top-sy));
+  barrel.style.transform=`rotate(${aimAngle}rad)`;
+}
+arena.addEventListener("pointermove",e=>setAim(e.clientX,e.clientY));
+arena.addEventListener("pointerdown",e=>{
+  if(!running){resetGame();setAim(e.clientX,e.clientY);return}
+  setAim(e.clientX,e.clientY);fire();
+});
+
+window.addEventListener("keydown",e=>{
+  keys[e.key.toLowerCase()]=true;
+  if(e.code==="Space"){e.preventDefault();if(!running)resetGame();fire();}
+  if(e.key==="Enter"&&gameOver)resetGame();
+});
+window.addEventListener("keyup",e=>keys[e.key.toLowerCase()]=false);
+
+function hold(btn,key){
+  btn.addEventListener("pointerdown",e=>{e.preventDefault();keys[key]=true});
+  btn.addEventListener("pointerup",()=>keys[key]=false);
+  btn.addEventListener("pointerleave",()=>keys[key]=false);
+}
+hold(document.getElementById("left"),"arrowleft");
+hold(document.getElementById("right"),"arrowright");
+document.getElementById("fireBtn").addEventListener("pointerdown",e=>{e.preventDefault();fire()});
+
+function fire(){
+  if(!running||gameOver)return;
+  const now=performance.now();
+  const cooldown=Date.now()<rapidUntil?70:220;
+  if(now-fireTimer<cooldown)return;
+  if(bullets.length>=MAX_BULLETS)return;
+  fireTimer=now;
+  const sx=playerX,sy=arena.clientHeight-53;
+  bullets.push({x:sx,y:sy,vx:Math.sin(aimAngle)*560,vy:-Math.cos(aimAngle)*560});
+}
+function spawnEnemy(){
+  if(enemies.length>=MAX_ENEMIES)return;
+  const el=document.createElement("div");el.className="enemy";
+  const name=errorNames[Math.floor(Math.random()*errorNames.length)];
+  el.innerHTML=`<strong>ERROR</strong>${name}`;
+  const x=Math.max(5,Math.random()*(arena.clientWidth-148));
+  el.style.left=x+"px";el.style.top="-55px";arena.appendChild(el);
+  enemies.push({el,x,y:-55,speed:50+level*9+Math.random()*30});
+}
+function spawnBoost(){
+  if(boosts.length>=MAX_BOOSTS)return;
+  const el=document.createElement("div");el.className="boost";el.textContent="⚡ 5s";
+  const x=25+Math.random()*(arena.clientWidth-70);
+  el.style.left=x+"px";el.style.top="-50px";arena.appendChild(el);
+  boosts.push({el,x,y:-50,speed:65});
+}
+function startBoss(){
+  boss={x:arena.clientWidth/2-105,y:55,hp:24,maxHp:24,t:0,shoot:0};
+  const el=document.createElement("div");el.className="boss";el.textContent="⚠️ MAXHOME MEGA ERROR";
+  boss.el=el;arena.appendChild(el);
+  bossBar.style.display="block";bossHP.style.width="100%";
+  message.textContent="BOSS: MEGA ERROR";
+  setTimeout(()=>{if(running)message.textContent=""},1200);
+}
+function nextLevel(){
+  clearLevelObjects();
+  level++;
+  killsThisLevel=0;
+  killsRequired=14+level*2;
+  if(level%5===0)startBoss();
+}
+function normalKill(){
+  score+=10+Math.min(combo,10);
+  combo++;
+  killsThisLevel++;
+  if(killsThisLevel>=killsRequired && !boss)nextLevel();
+}
+function hitBoss(){
+  if(!boss)return;
+  boss.hp--;
+  score+=15;
+  bossHP.style.width=(boss.hp/boss.maxHp*100)+"%";
+  if(boss.hp<=0){
+    boss.el.remove();boss=null;bossBar.style.display="none";
+    score+=250;level++;killsThisLevel=0;killsRequired=14+level*2;
+    message.textContent="BOSS CLEARED!";
+    setTimeout(()=>{if(running)message.textContent=""},900);
   }
-  return "";
 }
-
-function extractFields(text){
-  const fields=[];
-  const patterns=[
-    /Property Address/ig,/Closing Date/ig,/Buyer Agent Email/ig,/Seller Agent Email/ig,
-    /Buyer'?s? Agent Email/ig,/Seller'?s? Agent Email/ig,/Monthly Rental Price/ig,
-    /Total Compensation %?/ig,/Total Compensation Amount/ig,/Co-op Broker Percentage/ig,
-    /GF Number/ig,/Broker Signature/ig,/Scheduling Company Name/ig,/Client 2/ig,
-    /Section\s*\d+[A-Za-z]?(?:\(\d+\)|\.[A-Za-z0-9]+(?:\.[A-Za-z0-9]+)*)?/ig,
-    /Paragraph\s*\d+[A-Za-z]?(?:\([0-9A-Za-z]+\))?/ig
-  ];
-  for(const p of patterns){
-    for(const m of text.matchAll(p)) fields.push(clean(m[0]));
+function loseLife(){
+  lives--;combo=0;
+  if(lives<=0){
+    gameOver=true;running=false;
+    message.innerHTML=`GAME OVER<br><span style="font-size:14px">Score: ${score} · Press Enter or click to restart</span>`;
   }
-  return [...new Set(fields)];
+}
+function rapid(){
+  rapidUntil=Date.now()+5000;
+}
+function rect(o){return {x:o.x,y:o.y,w:o.el.offsetWidth,h:o.el.offsetHeight}}
+
+/* Stability helpers:
+   - Keep the browser from accumulating stale game objects.
+   - Remove DOM nodes whenever an object leaves play.
+   - Cap active objects so difficulty can increase without turning into a runaway loop.
+*/
+const MAX_ENEMIES=28, MAX_BULLETS=55, MAX_ENEMY_BULLETS=30, MAX_BOOSTS=4;
+
+function removeObject(arr,index){
+  const obj=arr[index];
+  if(obj && obj.el && obj.el.parentNode) obj.el.remove();
+  arr.splice(index,1);
 }
 
-function extractIssueDetails(remark){
-  let r=clean(remark);
-  r=r.replace(/^(hi|hello)[,!:.-]?\s*/i,"");
-  r=r.replace(/^Max missed\s+\d+\s+errors?\s*(?:on this one)?\s*:?\s*/i,"");
-  const parts=r.split(/\s+Also,\s+/i).map(x=>clean(x)).filter(Boolean);
-  return parts.length ? parts : [r];
+function clearLevelObjects(){
+  enemies.forEach(o=>o.el && o.el.remove());
+  bullets.forEach(o=>o.el && o.el.remove());
+  enemyBullets.forEach(o=>o.el && o.el.remove());
+  boosts.forEach(o=>o.el && o.el.remove());
+  enemies.length=0; bullets.length=0; enemyBullets.length=0; boosts.length=0;
 }
 
-function classify(text){
-  const t=text.toLowerCase();
-  if(/high[- ]?priority|urgent|critical|asap|closing.{0,30}issue/.test(t)) return "high_priority";
-  if(/rename|renamed|change the name|should be called|name change/.test(t)) return "rename";
-  if(/new version|version .*needed|need.*version|versioning|new form|add.*recognized|drop[- ]?down/.test(t)) return "version_or_enhancement";
-  if(/missing|missed|did not|didn't|cannot find|can't find|not showing|not updated|incorrect|wrong|error|requirement|should not|still showing/.test(t)) return "issue";
-  return "general";
-}
+function update(dt){
+  let move=0;
+  if(keys["a"]||keys["arrowleft"])move-=1;
+  if(keys["d"]||keys["arrowright"])move+=1;
+  playerX+=move*330*dt;
+  playerX=Math.max(30,Math.min(arena.clientWidth-30,playerX));
 
-function issuePhrase(remark, context){
-  const r=clean(remark);
-  const fields=extractFields(r);
-  const doc=extractDocument(r);
-  const issues=extractIssueDetails(r);
-  let phrase=issues.join(" Also, ");
-
-  if(doc && !r.toLowerCase().includes(doc.toLowerCase())) phrase=`${doc}: ${phrase}`;
-  if(phrase.length>360) phrase=phrase.slice(0,357).replace(/\s+\S*$/,'')+"...";
-  return {phrase, issues, doc, fields};
-}
-
-function extractRequestedRename(remark){
-  const r=clean(remark);
-  let m=r.match(/(?:rename|change)(?: the)?(?: document)?\s+(.+?)\s+(?:to|as)\s+["'“”]?([^"'“”.,;\n]+)["'“”]?/i);
-  if(m) return {oldName:clean(m[1]),newName:clean(m[2])};
-  m=r.match(/(.+?)\s+(?:should be|needs to be)\s+(?:called|renamed)\s+["'“”]?([^"'“”.,;\n]+)["'“”]?/i);
-  if(m) return {oldName:clean(m[1]),newName:clean(m[2])};
-  return null;
-}
-
-function isExplicitlyFixed(all,status){
-  return status==="fixed" || (status==="auto" && /\b(updated|fixed|corrected|processed|unarchived|added the errors|now present|should now display|has been resolved)\b/.test(all));
-}
-
-function makeReply(remark, context, status, tone){
-  const all=clean(remark+" "+context);
-  const allLower=all.toLowerCase();
-  const category=classify(remark);
-  const doc=extractDocument(remark);
-  const info=issuePhrase(remark,context);
-  const fields=info.fields;
-  const issues=info.issues;
-  const fixed=isExplicitlyFixed(allLower,status);
-
-  if(category==="high_priority"){
-    const target=doc || (fields.length?fields[0]:"issue");
-    return tone==="short"
-      ? `Thank you for flagging this. We’ll treat the ${target} issue as a high-priority item and the team is actively looking into it.`
-      : `Thank you for flagging this, and we apologize for the inconvenience. We’ve noted the high-priority issue involving ${target}${fields.length>1?` (${fields.slice(0,4).join(", ")})`:""}. The team is actively looking into what is causing the issue so the expected behavior can be addressed without making assumptions about the fix.`;
+  const spawnInterval=Math.max(.30,.82-level*.032);
+  if(!boss){
+    spawnTimer+=dt;
+    if(spawnTimer>=spawnInterval){spawnTimer=0;spawnEnemy();}
+    if(Math.random()<dt*.05)spawnBoost();
   }
 
-  if(category==="rename"){
-    const rr=extractRequestedRename(remark);
-    if(rr){
-      const oldName=rr.oldName || (doc || "document");
-      return `Thank you for pointing this out. We’ve noted the request to change the ${oldName} name to ${rr.newName}. We’ll review the document naming so it can be aligned with the terminology requested by your team.`;
+  for(let i=enemies.length-1;i>=0;i--){
+    const e=enemies[i];
+    e.y+=e.speed*dt;e.el.style.top=e.y+"px";
+    if(e.y>arena.clientHeight-35){
+      removeObject(enemies,i);loseLife();
     }
-    return `Thank you for pointing this out. We’ve noted the requested document name change and the specific naming concern. We’ll review it so the document terminology can be aligned with your team’s requirement.`;
   }
 
-  if(fixed){
-    if(/address/i.test(all)) return `Thank you for flagging this. We’ve updated the Property Address on ${doc || "the transaction"}, and it should now reflect the correct information.`;
-    if(/closing date/i.test(all)) return `Thank you for flagging this. We’ve updated the Closing Date on ${doc || "the transaction"}, and it should now reflect the correct information.`;
-    if(/unarchived|archived/i.test(all)) return `Thank you for bringing this to our attention. The ${doc || "document"} has been unarchived, so it should now be available in the transaction.`;
-    if(/document|contract|form/i.test(all)) return `Thank you for flagging this. The ${doc || "document"} has been updated or processed based on the issue reported, and it should now reflect the expected information.`;
-    return `Thank you for flagging this. We’ve addressed the reported issue, and the information should now reflect correctly.`;
-  }
-
-  if(category==="version_or_enhancement"){
-    if(/new version|version/i.test(allLower)){
-      const vm=all.match(/(?:version|ver(?:sion)?)\s*([0-9]{1,2}[_./-][0-9]{1,2}|[0-9]{2}[_./-][0-9]{2,4})/i);
-      const v=vm?vm[1]:null;
-      return `Thank you for bringing this to our attention. We’ve noted the versioning requirement for ${doc || "the document"}${v?` (${v})`:""}. The team will review the version mapping so Max recognizes the correct version going forward.`;
+  bullets.forEach((b,i)=>{
+    b.x+=b.vx*dt;b.y+=b.vy*dt;
+    const el=document.createElement("div");
+    if(!b.el){b.el=el;el.className="bullet";arena.appendChild(el)}
+    b.el.style.left=(b.x-3)+"px";b.el.style.top=(b.y-9)+"px";
+    if(b.x<-20||b.x>arena.clientWidth+20||b.y<-20||b.y>arena.clientHeight+20){
+      b.el.remove();bullets.splice(i,1);return;
     }
-    return `Thank you for bringing this to our attention. We’ve noted the request involving ${doc || "the document"}. The team will review the related document setup and logic so the requested behavior can be handled correctly going forward.`;
-  }
-
-  if(category==="issue"){
-    if(issues.length>1){
-      const joined=issues.slice(0,4).map(x=>x.replace(/^The\s+/i,"").trim().replace(/[.!?]+$/,'')).join(" and ");
-      return `Thank you for pointing this out, and we apologize for the inconvenience. We’ve noted the issues reported${doc ? ` for ${doc}` : ""}—${joined}. Our team is reviewing why Max did not identify or handle these items as expected and the related validation so we can address the underlying issue.`;
+    if(boss && b.x>boss.x && b.x<boss.x+210 && b.y>boss.y && b.y<boss.y+105){
+      b.el.remove();bullets.splice(i,1);hitBoss();return;
     }
-    const detail=(issues[0] || "the reported issue").replace(/[.!?]+$/,'');
-    const detailText=doc ? `the issue with ${doc}: ${detail}` : `the issue reported: ${detail}`;
-    return `Thank you for flagging this, and we apologize for the inconvenience. We’ve noted ${detailText}. Our team is reviewing why Max did not handle this item as expected and the related logic or validation so we can address the underlying issue.`;
-  }
-
-  const target=doc || (fields.length?fields[0]:"the item raised");
-  return `Thank you for sharing this with us. We’ve noted the point raised regarding ${target}. We’ll review the relevant setup and logic so the expected behavior is clearly understood and the appropriate next step can be determined.`;
-}
-
-function generateReply(){
-  const remark=document.getElementById("remark").value.trim();
-  const context=document.getElementById("context").value.trim();
-  const msg=document.getElementById("statusMsg");
-  const jiraBtn=document.getElementById("jiraBtn");
-  if(!remark){msg.textContent="Please paste a client remark first.";return}
-
-  lastRemark=remark; lastContext=context;
-  let reply=makeReply(remark,context,selectedStatus,selectedTone);
-
-  // Default output is intentionally 2–4 sentences. "Very Short" is the one exception.
-  if(selectedTone==="short"){
-    const s=reply.split(/(?<=[.!?])\s+/);
-    reply=s.slice(0,2).join(" ");
-  }
-  if(selectedTone==="friendly") reply=reply.replace(/Thank you for flagging this/g,"Thanks for flagging this").replace(/Thank you for pointing this out/g,"Thanks for pointing this out");
-  if(selectedTone==="apologetic" && !/apologize|apologies/i.test(reply)) reply="We apologize for the inconvenience. "+reply;
-
-  document.getElementById("reply").textContent=reply;
-  jiraBtn.disabled=false;
-  document.getElementById("jiraSection").style.display="none";
-  msg.textContent="Reply generated.";
-}
-
-function shorten(){
-  const r=document.getElementById("reply").textContent;
-  if(!r || r==="Your generated response will appear here.") return;
-  const sentences=r.split(/(?<=[.!?])\s+/);
-  document.getElementById("reply").textContent=sentences.slice(0,2).join(" ");
-}
-
-function copyReply(){
-  const text=document.getElementById("reply").textContent;
-  if(!text || text==="Your generated response will appear here.") return;
-  navigator.clipboard.writeText(text).then(()=>{
-    document.getElementById("statusMsg").textContent="Reply copied to clipboard.";
+    for(let j=enemies.length-1;j>=0;j--){
+      const e=enemies[j];
+      if(b.x>e.x&&b.x<e.x+138&&b.y>e.y&&b.y<e.y+48){
+        b.el.remove();bullets.splice(i,1);
+        e.el.remove();enemies.splice(j,1);normalKill();return;
+      }
+    }
+    for(let j=boosts.length-1;j>=0;j--){
+      const q=boosts[j];
+      if(b.x>q.x&&b.x<q.x+44&&b.y>q.y&&b.y<q.y+44){
+        b.el.remove();bullets.splice(i,1);q.el.remove();boosts.splice(j,1);rapid();return;
+      }
+    }
   });
-}
 
-function normalizeSentence(text){
-  let s=clean(text).replace(/^[-–—•]\s*/,'');
-  if(!s) return s;
-  s=s.replace(/\s+([,.;!?])/g,'$1');
-  s=s.replace(/,{2,}/g,',');
-  s=s.replace(/\.{2,}/g,'.');
-  s=s.replace(/\s+-\s+/g,' — ');
-  s=s.charAt(0).toUpperCase()+s.slice(1);
-  if(!/[.!?]$/.test(s)) s += '.';
-  return s;
-}
-
-function titleCaseSimple(text){
-  return clean(text).split(/\s+/).map((w,i)=>{
-    if(!w) return w;
-    const lower=w.toLowerCase();
-    const small=new Set(['a','an','the','and','or','to','of','in','on','for','by','with','is','are','has','have','only','as']);
-    if(i>0 && small.has(lower)) return lower;
-    return w.charAt(0).toUpperCase()+w.slice(1);
-  }).join(' ');
-}
-
-function buildJiraTicket(remark, context){
-  const doc=extractDocument(remark) || '';
-  const fields=extractFields(remark);
-  const issues=extractIssueDetails(remark);
-  const rr=extractRequestedRename(remark);
-  const full=clean(remark+' '+context);
-  const lower=full.toLowerCase();
-
-  let summary='';
-  let description='';
-  let issueType='Bug';
-  let priority=/high[- ]?priority|urgent|critical|asap/i.test(full) ? 'High' : 'Medium';
-  let component='Document Processing / Validation';
-
-  const pageNums=[...full.matchAll(/\b(\d+)\s+pages?\b/ig)].map(m=>Number(m[1]));
-  if(pageNums.length>=2 && /page|breaking|split|dropping|dropped|retained|retain/i.test(full) && pageNums[0]>pageNums[1]){
-    const expected=pageNums[0], actual=pageNums[1], diff=expected-actual;
-    component='Document Processing / PDF Handling';
-    summary=`${doc || 'Contract'} incorrectly reduces an ${expected}-page document to ${actual} pages`;
-    description=`When processing the ${expected}-page ${doc ? doc.toLowerCase() : 'contract'} through Max, the output contains only ${actual} pages instead of the original ${expected}. This results in ${diff} ${diff===1?'page':'pages'} being dropped from the document. Can we take a look at the page-count and document-processing behavior and make sure all ${expected} pages are retained?`;
-  } else if(rr){
-    issueType='Enhancement';
-    component='Document Classification / Naming';
-    const oldName=rr.oldName || doc || 'Document';
-    const newName=rr.newName || 'requested name';
-    summary=`${titleCaseSimple(oldName)} name change required — rename to ${titleCaseSimple(newName)}`;
-    description=`The client requested that ${oldName} be renamed to ${newName}. Please update the document naming so the requested name is reflected consistently in Max.`;
-  } else if(/new version|version .*needed|need.*version|versioning/i.test(lower)){
-    issueType='Enhancement';
-    component='Document Classification / Versioning';
-    const vm=full.match(/(?:version|ver(?:sion)?)\s*([0-9]{1,2}[_./-][0-9]{1,2}|[0-9]{2}[_./-][0-9]{2,4})/i);
-    const versionText=vm ? ` Required version: ${vm[1]}.` : '';
-    summary=`${doc || 'Document'} version mapping requires an update`;
-    description=`Max is not recognizing the expected version of ${doc || 'the document'}.${versionText} Can we review the version mapping and make sure the required version is recognized correctly?`;
-  } else if(/amendment/.test(lower) && /only\s*1|one.*active|active.*one|more than one|multiple amendments/i.test(full)) {
-    component='Document Processing / Transaction Document Handling';
-    issueType='Enhancement';
-    summary='Max only allows one amendment to remain active, but multiple amendments may be required for the listing and contract';
-    description='The client reported that several amendments may be associated with the listing agreement, but only one amendment can currently show as active while the remaining amendments are archived. They also noted that more than one amendment may be needed for the contract. Can we review the related amendment handling and active/archive logic so multiple applicable amendments can be retained and displayed as expected?';
-  } else if(issues.length>1){
-    component='Document Processing / Rule Validation';
-    const detail1=normalizeSentence(issues[0]).replace(/[.!?]$/,'');
-    const detail2=normalizeSentence(issues[1]).replace(/[.!?]$/,'');
-    summary=buildDetailedSummary(doc, issues, fields);
-    description=`The client reported the following issues with ${doc || 'the document'}: ${detail1}; ${detail2}. Can we review the related mapping and validation logic and address the reported issues without changing the expected business rules?`;
-  } else {
-    const detail=normalizeSentence(issues[0] || remark).replace(/[.!?]$/,'');
-    if(/missing|not showing|cannot find|can't find|not present|dropped|split/i.test(lower)) component='Document Processing / Document Visibility';
-    else if(/error|incorrect|wrong|still showing|should not|validation/i.test(lower)) component='Document Processing / Rule Validation';
-    else if(/required|should|must|logic/i.test(lower)) { issueType='Enhancement'; component='Document Rules / Validation'; }
-
-    const subject=doc || (fields.length ? fields[0] : 'Reported issue');
-    summary=buildDetailedSummary(doc, issues, fields);
-    let action='Can we take a look at the related logic and address the issue so the expected behavior is reflected in Max?';
-    if(/missing|not showing|cannot find|can't find|not present|dropped|split/i.test(lower))
-      action='Can we review the processing or mapping and make sure the expected information is retained and displayed correctly?';
-    else if(/error|incorrect|wrong|still showing|should not|validation/i.test(lower))
-      action='Can we review the related validation or mapping and correct the behavior so the appropriate error is triggered only when applicable?';
-    else if(/required|should|must|logic/i.test(lower))
-      action='Can we review the related rule or logic and align it with the requirement described above?';
-    description=`The client reported that ${detail.toLowerCase()}. ${action}`;
+  for(let i=boosts.length-1;i>=0;i--){
+    const q=boosts[i];
+    q.y+=q.speed*dt;q.el.style.top=q.y+"px";
+    if(q.y>arena.clientHeight)removeObject(boosts,i);
   }
 
-  return {summary: normalizeSummary(summary), issueType, priority, component, description: ensureDescription(description)};
-}
-
-function cleanSummaryText(text){
-  let s=clean(text)
-    .replace(/^for this one[,!:.-]?\s*/i,'')
-    .replace(/^the client (reported|said|noted) that\s*/i,'')
-    .replace(/\b(can we|could we|is there a way to|please|let us)\b.*$/i,'')
-    .replace(/\s+([,.;!?])/g,'$1')
-    .replace(/,{2,}/g,',')
-    .replace(/\.{2,}/g,'.')
-    .replace(/\s*[—-]\s*$/,'');
-  if(!s) return s;
-  s=s.charAt(0).toUpperCase()+s.slice(1);
-  if(!/[.!?]$/.test(s)) s += '.';
-  return s;
-}
-
-function trimAtSentenceBoundary(text, max=220){
-  const s=cleanSummaryText(text);
-  if(s.length<=max) return s;
-  const sentences=s.match(/[^.!?]+[.!?]+/g) || [s];
-  let out='';
-  for(const sentence of sentences){
-    const candidate=(out+' '+sentence).trim();
-    if(candidate.length<=max) out=candidate;
-    else break;
+  if(boss){
+    boss.t+=dt;boss.x=arena.clientWidth/2-105+Math.sin(boss.t*.8)*(arena.clientWidth/2-125);
+    boss.el.style.left=boss.x+"px";boss.el.style.top=boss.y+"px";
+    boss.shoot-=dt;
+    if(boss.shoot<=0){
+      boss.shoot=Math.max(.40,.95-level*.015);
+      const sx=boss.x+105,sy=boss.y+100,dx=playerX-sx,dy=(arena.clientHeight-45)-sy;
+      const len=Math.hypot(dx,dy)||1,sp=155+level*9;
+      if(enemyBullets.length<MAX_ENEMY_BULLETS){
+        enemyBullets.push({x:sx,y:sy,vx:dx/len*sp,vy:dy/len*sp});
+      }
+    }
   }
-  if(out) return out;
-  const words=s.split(/\s+/);
-  let result='';
-  for(const word of words){
-    const candidate=(result+' '+word).trim();
-    if(candidate.length>max) break;
-    result=candidate;
+
+  for(let i=enemyBullets.length-1;i>=0;i--){
+    const b=enemyBullets[i];
+    b.x+=b.vx*dt;b.y+=b.vy*dt;
+    if(!b.el){b.el=document.createElement("div");b.el.className="enemyBullet";arena.appendChild(b.el)}
+    b.el.style.left=(b.x-5)+"px";b.el.style.top=(b.y-5)+"px";
+    if(Math.hypot(b.x-playerX,b.y-(arena.clientHeight-30))<25){
+      removeObject(enemyBullets,i);loseLife();continue;
+    }
+    if(b.x<-20||b.x>arena.clientWidth+20||b.y<-20||b.y>arena.clientHeight+20){
+      removeObject(enemyBullets,i);
+    }
   }
-  return result.replace(/[,:;—-]+$/,'')+'.';
+
+  render();
 }
 
-function buildDetailedSummary(doc, issues, fields){
-  const meaningful=issues.map(cleanSummaryText).filter(Boolean);
-  let base=meaningful.join(' Also, ');
-  if(doc && meaningful.length===1 && !meaningful[0].toLowerCase().includes(doc.toLowerCase())){
-    base=`${doc}: ${meaningful[0]}`;
-  }
-  if(!base && fields.length) base=`${fields[0]} requires review.`;
-  if(!base) base='Reported issue requires review.';
-  return trimAtSentenceBoundary(base, 220);
+function loop(t){
+  const rawDt=(t-last)/1000||0;
+  const dt=Math.min(.033,Math.max(0,rawDt));last=t;
+  if(running&&!gameOver)update(dt);
+  requestAnimationFrame(loop);
 }
-
-function normalizeSummary(text){
-  return trimAtSentenceBoundary(text, 220);
-}
-
-function ensureDescription(text){
-  let s=clean(text).replace(/\s+([,.;!?])/g,'$1').replace(/,{2,}/g,',').replace(/\.{2,}/g,'.');
-  s=s.charAt(0).toUpperCase()+s.slice(1);
-  if(!/[.!?]$/.test(s)) s+='.';
-  return s;
-}
-
-function generateJiraSummary(){
-  const remark=lastRemark || document.getElementById('remark').value.trim();
-  const context=lastContext || document.getElementById('context').value.trim();
-  if(!remark) return;
-
-  const ticket=buildJiraTicket(remark,context);
-  const safe=(v)=>String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  const jiraText=`Summary: ${ticket.summary}\n\nIssue Type: ${ticket.issueType}\n\nPriority: ${ticket.priority}\n\nComponent: ${ticket.component}\n\nDescription:\n${ticket.description}`;
-
-  document.getElementById('jiraSummary').innerHTML=`
-    <div class="jiraField"><div class="jiraLabel">Summary:</div><div class="jiraValue">${safe(ticket.summary)}</div></div>
-    <div class="jiraField"><div class="jiraLabel">Issue Type:</div><div class="jiraValue">${safe(ticket.issueType)}</div></div>
-    <div class="jiraField"><div class="jiraLabel">Priority:</div><div class="jiraValue">${safe(ticket.priority)}</div></div>
-    <div class="jiraField"><div class="jiraLabel">Component:</div><div class="jiraValue">${safe(ticket.component)}</div></div>
-    <div class="jiraField" style="margin-bottom:0"><div class="jiraLabel">Description:</div><div class="jiraValue jiraDescription">${safe(ticket.description)}</div></div>`;
-  document.getElementById('jiraSummary').dataset.copyText=jiraText;
-  document.getElementById('jiraSection').style.display='block';
-  document.getElementById('statusMsg').textContent='Jira ticket details created.';
-}
-
-function copyJiraSummary(){
-  const box=document.getElementById("jiraSummary");
-  const text=box.dataset.copyText || box.innerText;
-  if(!text) return;
-  navigator.clipboard.writeText(text).then(()=>{
-    document.getElementById("statusMsg").textContent="Jira ticket copied to clipboard.";
-  });
-}
-
-function clearAll(){
-  document.getElementById("remark").value="";
-  document.getElementById("context").value="";
-  document.getElementById("reply").textContent="Your generated response will appear here.";
-  document.getElementById("jiraSummary").innerHTML="";
-  document.getElementById("jiraSummary").dataset.copyText="";
-  document.getElementById("jiraSection").style.display="none";
-  document.getElementById("jiraBtn").disabled=true;
-  document.getElementById("statusMsg").textContent="";
-  lastRemark=""; lastContext="";
-}
+render();
+requestAnimationFrame(loop);
 </script>
 </body>
 </html>
